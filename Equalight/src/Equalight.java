@@ -65,8 +65,9 @@ public class Equalight {
          if (listOfFiles[i].isFile()) {
            try {
 			images.put(listOfFiles[i].getName(), ImageIO.read(new File(path + "/" + listOfFiles[i].getName())));
+			System.out.println("Loaded file: " + listOfFiles[i].getName());
 			} catch (IOException e) {
-				System.out.println("Could not load file: " + listOfFiles[i].getName());
+				//System.out.println("Could not load file: " + listOfFiles[i].getName());
 			}
          }
        }
