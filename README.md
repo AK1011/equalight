@@ -8,7 +8,7 @@ Filter Options:
   
   The first argument must be the directory name.
 
-  -r <int>:
+  -r <int>:\n
     Red value from 0-255 to say what the new average Red value should be for the images. (Defaults to 0)
   -g <int>:
     Green value from 0-255 to say what the new average Green value should be for the images. (Defaults to 0)
