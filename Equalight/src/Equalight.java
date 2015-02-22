@@ -16,15 +16,42 @@ public class Equalight {
 	   if (args.length > 0) {
 		   dirPath += args[0];
 	   }
+	   String dirPathMod = dirPath + "-mod-";
+	   int redFilter = 0;
+	   int greenFilter = 0;
+	   int blueFilter = 0;
+	   int alphaFilter = 0;
+	   String previous = "";
+	   for (int i = 1; i < args.length; i++) {
+		   if (previous.equals("-r")) {
+			   redFilter = Integer.parseInt(args[i]);
+			   dirPathMod += "r=" + redFilter;
+		   }
+		   if (previous.equals("-g")) {
+			   greenFilter = Integer.parseInt(args[i]);
+			   dirPathMod += "g=" + greenFilter;
+		   }
+		   if (previous.equals("-b")) {
+			   blueFilter = Integer.parseInt(args[i]);
+			   dirPathMod += "b=" + blueFilter;
+		   }
+		   if (previous.equals("-a")) {
+			   alphaFilter = Integer.parseInt(args[i]);
+			   dirPathMod += "a=" + alphaFilter;
+		   }
+		   previous = args[i];
+	   }
+	   Color filter = new Color(redFilter, greenFilter, blueFilter, alphaFilter);
+	   
 	   System.out.println("Creating modified images for images in directory: " + dirPath);
 	   HashMap<String, BufferedImage> images = getAllImagesInDirectory(dirPath);
 	   Iterator it = images.entrySet().iterator();
-	   if (!new File(dirPath + "-mod").exists()) {
-		   new File(dirPath + "-mod").mkdir();
+	   if (!new File(dirPathMod).exists()) {
+		   new File(dirPathMod).mkdir();
 	   }
 	   while(it.hasNext()) {
 		   Map.Entry pair = (Map.Entry)it.next();
-		   modifyImageWithColor((BufferedImage)pair.getValue(), Color.red,dirPath + "-mod/" + (String)pair.getKey());
+		   modifyImageWithColor((BufferedImage)pair.getValue(), filter, dirPathMod + "/" + (String)pair.getKey());
 		   System.out.println("Created modified image for: " + pair.getKey());
 	   }
    }
@@ -44,8 +71,7 @@ public class Equalight {
          }
        }
 	   return images;
-   }
-   
+   }   
 
    public static BufferedImage modifyImageWithColor(BufferedImage image, Color c, String path) {
       int width = image.getWidth();
@@ -68,19 +94,21 @@ public class Equalight {
       b /= (width * height);
       
       double red = c.getRed(), green = c.getGreen(), blue = c.getBlue();
-      double rgb = (r + g + b) / 3.0;
-      r = g = b = rgb;
+      double rdiff = red / r, gdiff = green / g, bdiff = blue / b;
+      
       if (c.getAlpha() > 0) {
-         red = green = blue = c.getAlpha();
+    	  double avg = (r + g + b) / 3.0;
+    	  rdiff = gdiff = bdiff = c.getAlpha() / avg;
       }
+      
       double rr, gg, bb;
       for (int x = 0; x < width; x++) {
          for (int y = 0; y < height; y++) {
             int pix = image.getRGB(x, y);
             Color col = new Color(pix);
-            rr = col.getRed() * red / rgb;
-            gg = col.getGreen() * green / rgb;
-            bb = col.getBlue() * blue / rgb;
+            rr = col.getRed() * rdiff;
+            gg = col.getGreen() * gdiff;
+            bb = col.getBlue() * bdiff;
             col = new Color(Math.min(Math.max((int)rr, 0), 255), Math.min(Math.max((int)gg, 0), 255), Math.min(Math.max((int)bb, 0), 255));
             
             image.setRGB(x, y, col.getRGB());
